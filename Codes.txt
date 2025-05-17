@@ -1,15 +1,17 @@
 --------	Banking: Customer Churn Prediction
 		Topic: Customer Churn Prediction in Retail Banking
 
+  		/* Objective:
+		Use historical transaction data, customer demographics, and engagement metrics to build a predictive model that 			identifies customers at risk of closing their accounts.
+		Key Techniques: Logistic Regression, Random Forest, SHAP Values for explainability. */		
+
 		Tools Breakdown:
 
 		SQL: Extract transactional data (account activity, login frequency, balance history).
 
 		Python: Data cleaning, feature engineering, churn model with scikit-learn, and churn probability scoring.
 
-		Power BI/Excel: Create dashboards to display churn likelihood, key customer segments, and risk factors.
-
-
+		
 ----1. Segment Most Likely to Churn
 
 		SELECT Age, Gender, MaritalStatus, COUNT(*) AS total, 
