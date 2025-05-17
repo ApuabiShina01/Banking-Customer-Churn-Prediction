@@ -1,0 +1,146 @@
+--------	Banking: Customer Churn Prediction
+		Topic: Customer Churn Prediction in Retail Banking
+
+		Tools Breakdown:
+
+		SQL: Extract transactional data (account activity, login frequency, balance history).
+
+		Python: Data cleaning, feature engineering, churn model with scikit-learn, and churn probability scoring.
+
+		Power BI/Excel: Create dashboards to display churn likelihood, key customer segments, and risk factors.
+
+
+----1. Segment Most Likely to Churn
+
+		SELECT Age, Gender, MaritalStatus, COUNT(*) AS total, 
+     		  SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END) AS churned,
+ 		      ROUND(SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS churn_rate
+		FROM bank_customers
+		GROUP BY Age, Gender, MaritalStatus
+		ORDER BY churn_rate DESC
+		LIMIT 10;
+
+---- 2. Churn vs Digital Banking Usage
+
+		SELECT DigitalBankingUser, 
+       COUNT(*) AS total_customers,
+       SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END) AS churned_customers,
+       ROUND(SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS churn_rate
+FROM bank_customers
+GROUP BY DigitalBankingUser;
+
+
+---- 3. Monthly Activity Impact on Churn (Python)
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.boxplot(x='Churned', y='MonthlyAvgTransactions', data=df)
+plt.title("Monthly Transactions vs Churn")
+plt.show()
+
+
+-----4. Impact of Product Holding on Churn
+SELECT CreditCardHolder, LoanProductCount,
+       COUNT(*) AS total,
+       SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END) AS churned,
+       ROUND(SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END)*100.0/COUNT(*), 2) AS churn_rate
+FROM bank_customers
+GROUP BY CreditCardHolder, LoanProductCount
+ORDER BY churn_rate DESC;
+
+
+------5. Early Churn Signal Detection (Python + Time Analysis)
+
+df['MonthsSinceLastTransaction'] = (pd.to_datetime("2024-12-31") - pd.to_datetime(df['LastTransactionDate'])).dt.days // 30
+
+sns.histplot(data=df, x='MonthsSinceLastTransaction', hue='Churned', bins=20, kde=True)
+plt.title("Months Since Last Transaction vs Churn")
+plt.show()
+
+
+
+------ 6. Revenue Loss from Churn
+
+SELECT ROUND(AVG(AccountBalance), 2) AS avg_balance_loss,
+       COUNT(*) AS churned_customers,
+       ROUND(SUM(AccountBalance), 2) AS total_potential_loss
+FROM bank_customers
+WHERE Churned = 1;
+
+
+-------7. Churn vs Complaint Volume or NPS
+
+SELECT CustomerSatisfactionScore, 
+       COUNT(*) AS total,
+       SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END) AS churned,
+       ROUND(SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END)*100.0/COUNT(*), 2) AS churn_rate
+FROM bank_customers
+GROUP BY CustomerSatisfactionScore
+ORDER BY churn_rate DESC;
+
+
+-----8. Churn by Region
+
+SELECT Region,
+       COUNT(*) AS total_customers,
+       SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END) AS churned,
+       ROUND(SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END)*100.0/COUNT(*), 2) AS churn_rate
+FROM bank_customers
+GROUP BY Region
+ORDER BY churn_rate DESC;
+
+
+-----9. Strategy for High-Income, Low-Engagement
+
+SELECT CustomerID, Income, MobileAppUsageFrequency, Churned
+FROM bank_customers
+WHERE Income > 80000 AND MobileAppUsageFrequency < 2
+ORDER BY Income DESC;
+
+
+----10. Loyalty Program Effectiveness (Pre/Post Analysis)
+
+-- Before Loyalty Program
+SELECT 'Before' AS period,
+       COUNT(*) AS total,
+       SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END) AS churned,
+       ROUND(SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END)*100.0/COUNT(*), 2) AS churn_rate
+FROM bank_customers
+WHERE LoyaltyProgramDate < '2024-01-01'
+
+UNION ALL
+
+-- After Loyalty Program
+SELECT 'After' AS period,
+       COUNT(*) AS total,
+       SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END) AS churned,
+       ROUND(SUM(CASE WHEN Churned = 1 THEN 1 ELSE 0 END)*100.0/COUNT(*), 2) AS churn_rate
+FROM bank_customers
+WHERE LoyaltyProgramDate >= '2024-01-01';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
